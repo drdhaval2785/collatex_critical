@@ -1,11 +1,14 @@
 import xml.etree.ElementTree as ET
+import re
 
 def collatex_to_markdown(xml_file, witness_order=None):
     """
     Convert CollateX XML output to Markdown with main readings and footnotes.
-    Footnotes format: [B] suKi naH; [C] saMtu
+    Footnotes format: [01] variant
     Superscript markers appear immediately after the main word.
-    Alternate readings are grouped by identical reading and sorted according to witness_order.
+    Consecutive multi-token variants per witness are merged.
+    Major reading is chosen by majority vote; singleton readings go to footnote.
+    Φ denotes majority of witnesses have no reading.
     """
     if witness_order is None:
         witness_order = []
@@ -17,7 +20,9 @@ def collatex_to_markdown(xml_file, witness_order=None):
     markdown_body = []
     footnotes = []
     footnote_counter = 1
-    i = 0
+
+    # Buffers for consecutive variants per witness
+    variant_buffer = {w: "" for w in witness_order}
 
     def get_readings(app):
         readings = []
@@ -28,33 +33,17 @@ def collatex_to_markdown(xml_file, witness_order=None):
                 readings.append((wit_ids, text))
         return readings
 
-    while i < len(apps):
-        readings = get_readings(apps[i])
-
-        # Merge consecutive singleton tokens from the same witness
-        if i + 1 < len(apps):
-            next_readings = get_readings(apps[i + 1])
-            merged = False
-            if len(next_readings) == 1:
-                next_wits, next_text = next_readings[0]
-                for idx, (wits, text) in enumerate(readings):
-                    if next_wits[0] in wits:
-                        readings[idx] = (wits, text + " " + next_text)
-                        merged = True
-                        break
-                if merged:
-                    i += 1  # skip next app
-
+    for app in apps:
+        readings = get_readings(app)
         if not readings:
-            i += 1
             continue
 
-        # Build vote map
+        # Count witnesses for each reading
         count_map = {}
-        for wit_ids, text in readings:
-            count_map.setdefault(text, set()).update(wit_ids)
+        for wits, text in readings:
+            count_map.setdefault(text, set()).update(wits)
 
-        # Determine main reading
+        # Sort readings: by number of witnesses (desc), then witness_order
         def sort_key(item):
             text, wits = item
             size = len(wits)
@@ -65,52 +54,63 @@ def collatex_to_markdown(xml_file, witness_order=None):
             return (-size, precedence)
 
         sorted_readings = sorted(count_map.items(), key=sort_key)
+
         main_text, main_wits = sorted_readings[0]
+        max_count = len(main_wits)
 
-        # Handle footnotes for alternate readings
-        if len(sorted_readings) > 1:
-            # Group same reading witnesses and sort witnesses according to witness_order
-            alt_map = {}
-            for text, wits in sorted_readings[1:]:
-                sorted_wits = sorted(wits, key=lambda x: witness_order.index(x) if x in witness_order else len(witness_order))
-                alt_map.setdefault(text, []).extend(sorted_wits)
+        # Determine majority null: if more than half witnesses don't have this reading
+        total_wits = len(witness_order)
+        missing_count = total_wits - max_count
+        if max_count <= 1 or missing_count >= (total_wits / 2):
+            main_text = None
 
-            # Build footnote string
+        # Update variant buffers
+        for text, wits in sorted_readings:
+            if text == main_text:
+                continue
+            for w in wits:
+                variant_buffer[w] += text + " "
+
+        # Build footnotes for this position if main_text exists or variants present
+        alt_map = {}
+        for w, buf in variant_buffer.items():
+            buf = buf.strip()
+            if buf:
+                alt_map.setdefault(buf, []).append(w)
+                variant_buffer[w] = ""  # reset
+
+        # Append to markdown body
+        if main_text:
+            markdown_body.append(f"{main_text}[^{footnote_counter}]" if alt_map else main_text)
+        elif alt_map:
+            # Majority absent → use Φ
+            markdown_body.append(f"Φ[^{footnote_counter}]")
+
+        if alt_map:
             alts = []
             for text, wits_list in alt_map.items():
-                # remove duplicates if a witness appears multiple times
+                # sort witnesses according to witness_order
                 wits_unique = []
-                for w in wits_list:
+                for w in sorted(wits_list, key=lambda x: witness_order.index(x) if x in witness_order else len(witness_order)):
                     if w not in wits_unique:
                         wits_unique.append(w)
                 alts.append(f"[{','.join(wits_unique)}] {text}")
-            markdown_body.append(f"{main_text}[^{footnote_counter}]")
             footnotes.append((footnote_counter, "; ".join(alts)))
             footnote_counter += 1
-        else:
-            markdown_body.append(main_text)
 
-        i += 1
-
-    # Join body text and clean spacing around punctuation
+    # Join body text with spaces
     body_text = " ".join(markdown_body)
-    body_text = (
-        body_text.replace("  ", " ")
-        .replace(" .", ".")
-        .replace(" ,", ",")
-        .replace(" :", ":")
-        .replace(" ;", ";")
-        .replace(" !", "!")
-        .replace(" ?", "?")
-    )
+    body_text = re.sub(r'\s+', ' ', body_text).strip()
 
-    # Prepare footnotes
+    # Combine footnotes
     notes_text = "\n".join([f"[^{num}]: {alt}" for num, alt in footnotes])
+
     return f"{body_text}\n\n{notes_text}"
 
 
-# ----------------- Example usage -----------------
+# ---------------- Example usage ----------------
 if __name__ == "__main__":
     witness_order = [f"{i:02d}" for i in range(1, 11)]  # ["01","02",...,"10"]
     md_output = collatex_to_markdown("collation.xml", witness_order)
     print(md_output)
+
