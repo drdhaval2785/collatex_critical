@@ -1,15 +1,9 @@
+#!/usr/bin/env python3
 import xml.etree.ElementTree as ET
 import re
+import sys
 
 def collatex_to_markdown(xml_file, witness_order=None):
-    """
-    Convert CollateX XML output to Markdown with main readings and footnotes.
-    Footnotes format: [01] variant
-    Superscript markers appear immediately after the main word.
-    Consecutive multi-token variants per witness are merged.
-    Major reading is chosen by majority vote; singleton readings go to footnote.
-    Φ denotes majority of witnesses have no reading.
-    """
     if witness_order is None:
         witness_order = []
 
@@ -83,7 +77,6 @@ def collatex_to_markdown(xml_file, witness_order=None):
         if main_text:
             markdown_body.append(f"{main_text}[^{footnote_counter}]" if alt_map else main_text)
         elif alt_map:
-            # Majority absent → use Φ
             markdown_body.append(f"Φ[^{footnote_counter}]")
 
         if alt_map:
@@ -108,9 +101,18 @@ def collatex_to_markdown(xml_file, witness_order=None):
     return f"{body_text}\n\n{notes_text}"
 
 
-# ---------------- Example usage ----------------
 if __name__ == "__main__":
-    witness_order = [f"{i:02d}" for i in range(1, 11)]  # ["01","02",...,"10"]
-    md_output = collatex_to_markdown("collation.xml", witness_order)
-    print(md_output)
+    if len(sys.argv) != 3:
+        print("Usage: python xml_to_markdown.py input.xml output.md")
+        sys.exit(1)
 
+    xml_file = sys.argv[1]
+    md_file = sys.argv[2]
+
+    witness_order = [f"{i:02d}" for i in range(1, 11)]  # default 01..10
+    md_output = collatex_to_markdown(xml_file, witness_order)
+
+    with open(md_file, "w", encoding="utf-8") as f:
+        f.write(md_output)
+
+    print(f"Markdown written to {md_file}")
