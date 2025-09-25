@@ -1,17 +1,15 @@
-Lorem[^1] ipsum dolor[^2] Φ[^3] sit[^4] amet , Φ[^5] consectetur Φ[^6] adipiscing elit . Sed Φ[^7] do[^8] Φ[^9] eiusmod Φ[^10] tempor incididunt Φ[^11] ut Φ[^12] labore[^13] Φ[^14] et[^15] dolore magna aliqua .
+Φ krameRodAharaRAnyAha[^1] .. ..[^2] BUpAla iti . BUpAlapramuKAH . BUmAn iti paryantA ete[^3] zaw rAjYo nAmavAcakAH . itiSabdaH prakArArTastena[^4] BUpAdayo ' pi .. ..[^5] 4 .. BUmAMSceti . kavirUQyeti . kavInAM rUQiH paramparA yA tA prasidDistayA[^6] . udAharaRAnAmAvalI SreRirudAharaRAvalI jYeyA jYAtavyA[^7] . na tu[^8] kavirUQyatikrameRa[^9] . yaTA kapAlItyAdO satyapi svasvAmiBAve sambanDe[^10] kapAlIti matvarTIya eva Bavati . na[^11] tu kapAlapAlaH[^12] kapAlaDana ityAdi .. ..[^13] 5 ..
 
-[^1]: [09] orem
-[^2]: [04,10] dolore; [07] dolar
-[^3]: [02] etiam; [03] igitur
-[^4]: [02] sits
-[^5]: [04] igitur; [05] s
-[^6]: [02] vero; [10] metua
-[^7]: [09] —
-[^8]: [06,07] dos
-[^9]: [03] etiam
-[^10]: [06] autem; [08] ropmet
-[^11]: [08] —
-[^12]: [03] etiam
-[^13]: [04] labori
-[^14]: [05] enim
-[^15]: [09] ets
+[^1]: [#01] kramaRodAharaRAnyAha
+[^2]: [#01] .
+[^3]: [#02] pati
+[^4]: [#03] itiSabdaprakArTastena
+[^5]: [#03] ..
+[^6]: [#02] prasidDistaTA
+[^7]: [#03] jYAtavyAH
+[^8]: [#03] tatu
+[^9]: [#03] kavirUqyatikrameRa
+[^10]: [#02] sambanDo
+[^11]: [#03] nanu
+[^12]: [#02] kapAlaH
+[^13]: [#03] ..
