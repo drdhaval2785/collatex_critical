@@ -11,13 +11,8 @@ if __name__ == "__main__":
 		witness_id = bare
 		witness_data = open(fil, 'r', encoding='utf-8').read()
 		collation.add_plain_witness(witness_id, witness_data)
-	#table = collate(collation, segmentation=False, near_match=True)
-	#tei = collate(collation, output="tei", segmentation=False, near_match=True)
-	#json = collate(collation, output="json", segmentation=False, near_match=True)
-	#print(json)
-	#print(tei)
-	xml = collate(collation, output="xml")
+	xml = collate(collation, output="xml", segmentation=False, near_match=True)
 	print(xml)
 
-	table = collate(collation, )
+	table = collate(collation, segmentation=False, near_match=True)
 	print(table)
