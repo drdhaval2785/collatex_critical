@@ -92,7 +92,7 @@ def main():
         sys.exit(1)
 
     project_id = sys.argv[1]
-    input_path = f"input/{project_id}/slp1/{project_id}.json"
+    input_path = f"output/{project_id}/slp1/{project_id}.json"
     output_base = f"output/{project_id}"
 
     # Load JSON

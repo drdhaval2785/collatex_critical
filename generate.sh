@@ -41,16 +41,19 @@ for file in "$SRC_DIR"/*; do
     sanscript --from="$SRC" --to="$t" --input-file "$file" --output-file "$INPUT_DIR/$t/$filename"
   done
 done
+echo "TRANSLITERATION COMPLETED AFTER $SECONDS SECONDS."
 
 # Step 3: Run collator on SLP1
 if [[ " ${TRANSLITS[*]} " =~ " slp1 " ]]; then
   echo "Running collator on slp1 witnesses..."
   java -jar collatex-tools-1.7.1.jar -f json -o output/$PROJECT_ID/slp1/$PROJECT_ID.json input/$PROJECT_ID/slp1/*.txt
 fi
+echo "COLLATION COMPLETED AFTER $SECONDS SECONDS."
 
 # Step 4: Run merger
 echo "Running merger..."
 python3 merger.py "$PROJECT_ID"
+echo "MERGER TO MARKDOWN COMPLETED AFTER $SECONDS SECONDS."
 
 # Step 5 & 6: Pandoc → PDF and TeX for all transliterations
 for t in "${TRANSLITS[@]}"; do
@@ -67,10 +70,15 @@ for t in "${TRANSLITS[@]}"; do
       -o "$OUTPUT_DIR/$t/$PROJECT_ID.tex" \
       --pdf-engine=xelatex \
       -V mainfont="Sanskrit2003"
+
+    echo "Converting $MD_FILE to HTML..."
+    pandoc "$MD_FILE" \
+      -o "$OUTPUT_DIR/$t/$PROJECT_ID.html"
   else
     echo "Warning: $MD_FILE not found. Skipping PDF/TeX conversion for $t."
   fi
 done
+echo "PDF, TEX AND HTML GENERATION COMPLETED AFTER $SECONDS SECONDS."
 
 echo "✅ All done. Results are in $OUTPUT_DIR"
 
