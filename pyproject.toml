@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=77.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "collatex-critical"
+version = "0.1.0"
+description = "Critical edition enhancements for CollateX with footnote apparatus and transliterations"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "GPL-3.0-or-later"      # SPDX expression for GNU GPL v3+
+license-files = ["LICENSE"]       # path to license file
+authors = [{name = "Dr. Dhaval Patel", email = "drdhaval2785@gmail.com"}]
+dependencies = [
+    "collatex>=1.7.0",
+    "indic-transliteration"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Text Processing :: Linguistic",
+    "Intended Audience :: Education"
+]
+urls = { "Homepage" = "https://github.com/drdhaval2785/collatex-critical" }
+
