@@ -129,8 +129,9 @@ If everything goes as expected, you should see the output in output/test directo
 
 If there is any error logged, make sure you have installed the necessary dependencies and have the collatex-tools/1.7.1/collatex-tools-1.7.1.jar file at the correct location.
 
-## Example outputs
+## Example output
 
+<img width="773" height="630" alt="image" src="https://github.com/user-attachments/assets/ad634d2e-0902-40a2-8ca1-73c7971f85ec" />
 
 
 ## Contributing
