@@ -38,9 +38,6 @@ for file in "$SRC_DIR"/*; do
   filename=$(basename "$file")
 
   for t in "${TRANSLITS[@]:1}"; do
-    echo $SRC;
-    echo $file;
-    echo "$INPUT_DIR/$t/$filename";
     sanscript --from="$SRC" --to="$t" --input-file "$file" --output-file "$INPUT_DIR/$t/$filename"
   done
 done

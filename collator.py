@@ -13,8 +13,11 @@ if __name__ == "__main__":
 	directory = 'input/' + project_id + '/slp1'
 	outfile = 'output/' + project_id + '/slp1/' + project_id + '.xml'
 	files = glob.glob(directory + '/' + '*.txt')
+	files = sorted(files)
 	collation = Collation()
+	print(files)
 	for fil in files:
+		print(fil)
 		witness_id = os.path.splitext(os.path.basename(fil))[0]  # '1', '2', '3'
 		witness_data = open(fil, 'r', encoding='utf-8').read()
 		collation.add_plain_witness(witness_id, witness_data)
@@ -22,5 +25,7 @@ if __name__ == "__main__":
 	xml = collate(collation, output="xml", segmentation=False, near_match=True)
 	fout = open(outfile, 'w', encoding='utf-8')
 	fout.write(xml)
+	#print(xml)
+	print(f"Collated witnesses and wrote to {outfile}")
 	fout.close()
 
