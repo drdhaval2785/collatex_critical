@@ -80,6 +80,7 @@ merger.py
    * Less than 10 witnesses: `1.txt`, `2.txt`, `3.txt` …
    * 10 or more witnesses: `01.txt`, `02.txt`, `03.txt` …
 3. **File order indicates descending precedence** (first file = highest authority).
+4. Make sure that collatex-tools/1.7.1/collatex-tools-1.7.1.jar is in the same folder as generate.sh file.
 
 ---
 
@@ -115,6 +116,22 @@ For each project:
 > The choice of the most faithful witness is left to the editor’s discretion (e.g., oldest, most accurate, or scholarly judgment).
 
 ---
+
+## Checking your installation
+
+The github repository has a test data in input/test/devanagari/ directory.
+
+It carries three witnesses of a manuscript.
+
+Run the following from your commandline `sh generate.sh test`.
+
+If everything goes as expected, you should see the output in output/test directory.
+
+If there is any error logged, make sure you have installed the necessary dependencies and have the collatex-tools/1.7.1/collatex-tools-1.7.1.jar file at the correct location.
+
+## Example outputs
+
+
 
 ## Contributing
 
