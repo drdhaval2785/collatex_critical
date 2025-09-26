@@ -55,19 +55,25 @@ fi
 echo "Running merger..."
 python3 merger.py "$PROJECT_ID"
 
-# Step 5: Pandoc → PDF
-echo "Converting Markdown to PDF..."
-pandoc "$OUTPUT_DIR/slp1/$PROJECT_ID.md" \
-  -o "$OUTPUT_DIR/slp1/$PROJECT_ID.pdf" \
-  --pdf-engine=xelatex \
-  -V mainfont="Sanskrit2003"
+# Step 5 & 6: Pandoc → PDF and TeX for all transliterations
+for t in "${TRANSLITS[@]}"; do
+  MD_FILE="$OUTPUT_DIR/$t/$PROJECT_ID.md"
+  if [ -f "$MD_FILE" ]; then
+    echo "Converting $MD_FILE to PDF..."
+    pandoc "$MD_FILE" \
+      -o "$OUTPUT_DIR/$t/$PROJECT_ID.pdf" \
+      --pdf-engine=xelatex \
+      -V mainfont="Sanskrit2003"
 
-# Step 6: Pandoc → TeX
-echo "Converting Markdown to TeX..."
-pandoc "$OUTPUT_DIR/slp1/$PROJECT_ID.md" \
-  -o "$OUTPUT_DIR/slp1/$PROJECT_ID.tex" \
-  --pdf-engine=xelatex \
-  -V mainfont="Sanskrit2003"
+    echo "Converting $MD_FILE to TeX..."
+    pandoc "$MD_FILE" \
+      -o "$OUTPUT_DIR/$t/$PROJECT_ID.tex" \
+      --pdf-engine=xelatex \
+      -V mainfont="Sanskrit2003"
+  else
+    echo "Warning: $MD_FILE not found. Skipping PDF/TeX conversion for $t."
+  fi
+done
 
 echo "✅ All done. Results are in $OUTPUT_DIR"
 

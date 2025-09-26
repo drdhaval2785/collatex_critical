@@ -24,7 +24,7 @@ def process_collation(xml_file):
     for app in root.findall("app"):
         readings_map = defaultdict(list)  # reading -> list of witnesses
         for rdg in app.findall("rdg"):
-            text_slp = rdg.text.strip() if rdg.text and rdg.text.strip() else "Φ"
+            text_slp = rdg.text.strip() if rdg.text and rdg.text.strip() else "<>"
             readings_map[text_slp].append(rdg.get("wit"))
 
         # sort readings by number of witnesses, then by witness order
@@ -34,21 +34,21 @@ def process_collation(xml_file):
         )
         main_reading_slp, main_wits = sorted_readings[0]
 
-        # convert main reading to SLP1 output (keep Φ as is)
-        main_display = main_reading_slp if main_reading_slp else "Φ"
+        # convert main reading to SLP1 output (keep <> as is)
+        main_display = main_reading_slp if main_reading_slp else "<>"
 
         # process minority readings
         minority_readings = sorted_readings[1:]
         if minority_readings:
             footnote_entries = []
             for text_slp, wits in minority_readings:
-                display_text = text_slp if text_slp else "Φ"
+                display_text = text_slp if text_slp else "<>"
                 wits_str = ",".join(sorted(wits, key=lambda w: witness_order.index(w)))
-                footnote_entries.append(f"[#{wits_str}] {display_text}")
+                footnote_entries.append(f"[{wits_str}] {display_text}")
             footnote_text = "; ".join(footnote_entries)
             footnotes.append(f"[^{footnote_counter}]: {footnote_text}")
-            # append footnote to main display only if not Φ
-            if main_display != "Φ":
+            # append footnote to main display only if not <>
+            if main_display != "<>":
                 main_display += f"[^{footnote_counter}]"
             else:
                 main_display += f"[^{footnote_counter}]"
@@ -62,12 +62,12 @@ def process_collation(xml_file):
 def transliterate_text(main_text, footnotes, target):
     """Transliterate SLP1 main_text and footnotes to target script (devanagari or iast)"""
     def translit(s):
-        # Preserve Φ and footnote superscripts
+        # Preserve <> and footnote superscripts
         parts = []
         i = 0
         while i < len(s):
-            if s[i] == 'Φ':
-                parts.append('Φ')
+            if s[i] == '<>':
+                parts.append('<>')
                 i += 1
             elif s[i] == '[':
                 # footnote or witness reference
@@ -79,9 +79,9 @@ def transliterate_text(main_text, footnotes, target):
                     parts.append(s[i:j+1])
                     i = j+1
             else:
-                # collect normal text until next Φ or [
+                # collect normal text until next <> or [
                 j = i
-                while j < len(s) and s[j] != 'Φ' and s[j] != '[':
+                while j < len(s) and s[j] != '<>' and s[j] != '[':
                     j += 1
                 parts.append(sanscript.transliterate(s[i:j], 'slp1', target))
                 i = j
