@@ -45,10 +45,7 @@ done
 # Step 3: Run collator on SLP1
 if [[ " ${TRANSLITS[*]} " =~ " slp1 " ]]; then
   echo "Running collator on slp1 witnesses..."
-  python3 collator.py "$PROJECT_ID"
-else
-  echo "Warning: 'slp1' not in transliteration list, skipping collator/merger."
-  exit 0
+  java -jar collatex-tools-1.7.1.jar -f json -o output/$PROJECT_ID/slp1/$PROJECT_ID.json input/$PROJECT_ID/slp1/*.txt
 fi
 
 # Step 4: Run merger

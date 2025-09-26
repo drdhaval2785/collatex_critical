@@ -1,131 +1,127 @@
-#!/usr/bin/env python3
+import json
 import sys
 import os
-import xml.etree.ElementTree as ET
 from collections import defaultdict
+import re
 from indic_transliteration import sanscript
+from indic_transliteration.sanscript import transliterate
 
-def process_collation(xml_file):
-    """Process XML and return main_text and footnotes in SLP1"""
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+# --------------------------
+# Collation and Markdown generation
+# --------------------------
+def collatex_json_to_markdown(collatex_json, witnesses):
+    table = collatex_json["table"]
+    markdown_text = []
+    apparatus_notes = []
+    note_counter = 1
 
-    # infer witness order from first <rdg> elements
-    witness_order = []
-    for rdg in root.findall(".//rdg"):
-        wit = rdg.get("wit")
-        if wit not in witness_order:
-            witness_order.append(wit)
+    for col in table:
+        readings = []
+        for i, w in enumerate(witnesses):
+            if i < len(col) and col[i]:
+                readings.append(("".join(col[i]), w))
 
-    footnote_counter = 1
-    footnotes = []
-    main_text_parts = []
+        if not readings:
+            continue
 
-    for app in root.findall("app"):
-        readings_map = defaultdict(list)  # reading -> list of witnesses
-        for rdg in app.findall("rdg"):
-            text_slp = rdg.text.strip() if rdg.text and rdg.text.strip() else "<>"
-            readings_map[text_slp].append(rdg.get("wit"))
+        # Count frequency of each reading
+        freq = defaultdict(list)
+        for reading, w in readings:
+            freq[reading].append(w)
 
-        # sort readings by number of witnesses, then by witness order
-        sorted_readings = sorted(
-            readings_map.items(),
-            key=lambda x: (-len(x[1]), min(witness_order.index(w) for w in x[1]))
-        )
-        main_reading_slp, main_wits = sorted_readings[0]
+        # Select base reading: most frequent, tie-break by witness order
+        max_count = max(len(ws) for ws in freq.values())
+        candidates = [r for r, ws in freq.items() if len(ws) == max_count]
+        if len(candidates) == 1:
+            base_reading = candidates[0]
+        else:
+            base_reading = min(candidates, key=lambda r: witnesses.index(freq[r][0]))
 
-        # convert main reading to SLP1 output (keep <> as is)
-        main_display = main_reading_slp if main_reading_slp else "<>"
+        # Only create apparatus if variants exist
+        variants = {r: ws for r, ws in freq.items() if r != base_reading}
+        if variants:
+            footnote_marker = f"[^{note_counter}]"
+            markdown_text.append(base_reading.rstrip() + footnote_marker)
 
-        # process minority readings
-        minority_readings = sorted_readings[1:]
-        if minority_readings:
-            footnote_entries = []
-            for text_slp, wits in minority_readings:
-                display_text = text_slp if text_slp else "<>"
-                wits_str = ",".join(sorted(wits, key=lambda w: witness_order.index(w)))
-                footnote_entries.append(f"[{wits_str}] {display_text}")
-            footnote_text = "; ".join(footnote_entries)
-            footnotes.append(f"[^{footnote_counter}]: {footnote_text}")
-            # append footnote to main display only if not <>
-            if main_display != "<>":
-                main_display += f"[^{footnote_counter}]"
-            else:
-                main_display += f"[^{footnote_counter}]"
-            footnote_counter += 1
+            # Apparatus formatting: club witnesses with same reading
+            parts = []
+            for reading, ws in variants.items():
+                label = f"[{','.join(ws)}]"
+                parts.append(f"{label} {reading.strip()}")
+            apparatus_notes.append((f"[^{note_counter}]", "; ".join(parts)))
+            note_counter += 1
+        else:
+            markdown_text.append(base_reading.rstrip())
 
-        main_text_parts.append(main_display)
+    return " ".join(markdown_text), apparatus_notes
 
-    main_text = " ".join(main_text_parts)
-    return main_text, footnotes
+# --------------------------
+# Safe transliteration
+# --------------------------
+def safe_transliterate(text, target_script):
+    """
+    Transliterates SLP1 text to target_script, keeping footnote markers [^1] 
+    and witness tags [w1,w2] unchanged.
+    """
+    pattern = r'\[\^\d+\]|\[[^\]]+\]'
+    parts = []
+    last = 0
+    for m in re.finditer(pattern, text):
+        if m.start() > last:
+            parts.append(transliterate(text[last:m.start()], sanscript.SLP1, target_script))
+        parts.append(m.group(0))
+        last = m.end()
+    if last < len(text):
+        parts.append(transliterate(text[last:], sanscript.SLP1, target_script))
+    return ''.join(parts)
 
-def transliterate_text(main_text, footnotes, target):
-    """Transliterate SLP1 main_text and footnotes to target script (devanagari or iast)"""
-    def translit(s):
-        # Preserve <> and footnote superscripts
-        parts = []
-        i = 0
-        while i < len(s):
-            if s[i] == '<>':
-                parts.append('<>')
-                i += 1
-            elif s[i] == '[':
-                # footnote or witness reference
-                j = s.find(']', i)
-                if j == -1:
-                    parts.append(s[i])
-                    i += 1
-                else:
-                    parts.append(s[i:j+1])
-                    i = j+1
-            else:
-                # collect normal text until next <> or [
-                j = i
-                while j < len(s) and s[j] != '<>' and s[j] != '[':
-                    j += 1
-                parts.append(sanscript.transliterate(s[i:j], 'slp1', target))
-                i = j
-        return ''.join(parts)
+def transliterate_markdown(text, apparatus, target_script):
+    translit_text = safe_transliterate(text, target_script)
+    translit_apparatus = []
+    for footnote, rest in apparatus:
+        translit_rest = safe_transliterate(rest, target_script)
+        translit_apparatus.append(f"{footnote}: {translit_rest}")
+    return translit_text, translit_apparatus
 
-    main_text_out = translit(main_text)
-    footnotes_out = [translit(fn) for fn in footnotes]
-    return main_text_out, footnotes_out
-
+# --------------------------
+# Main script
+# --------------------------
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python merger.py project_id")
+        print("Usage: python collator.py <project_id>")
         sys.exit(1)
 
     project_id = sys.argv[1]
-    xml_file = f"output/{project_id}/slp1/{project_id}.xml"
+    input_path = f"input/{project_id}/slp1/{project_id}.json"
+    output_base = f"output/{project_id}"
 
-    # ensure output directories exist
-    os.makedirs(f"output/{project_id}/slp1", exist_ok=True)
-    os.makedirs(f"output/{project_id}/iast", exist_ok=True)
-    os.makedirs(f"output/{project_id}/devanagari", exist_ok=True)
+    # Load JSON
+    with open(input_path, "r", encoding="utf-8") as f:
+        collatex_json = json.load(f)
 
-    main_text_slp1, footnotes_slp1 = process_collation(xml_file)
-    with open(f"output/{project_id}/slp1/{project_id}.md", "w", encoding="utf-8") as f:
-        f.write(main_text_slp1 + "\n\n")
-        for fn in footnotes_slp1:
-            f.write(fn + "\n")
-        print(f"Markdown written to output/{project_id}/slp1/{project_id}.md")
+    witnesses = collatex_json["witnesses"]
 
-    # IAST
-    main_text_iast, footnotes_iast = transliterate_text(main_text_slp1, footnotes_slp1, 'iast')
-    with open(f"output/{project_id}/iast/{project_id}.md", "w", encoding="utf-8") as f:
-        f.write(main_text_iast + "\n\n")
-        for fn in footnotes_iast:
-            f.write(fn + "\n")
-        print(f"Markdown written to output/{project_id}/iast/{project_id}.md")
+    # Generate base markdown
+    text, apparatus = collatex_json_to_markdown(collatex_json, witnesses)
 
-    # Devanagari
-    main_text_deva, footnotes_deva = transliterate_text(main_text_slp1, footnotes_slp1, 'devanagari')
-    with open(f"output/{project_id}/devanagari/{project_id}.md", "w", encoding="utf-8") as f:
-        f.write(main_text_deva + "\n\n")
-        for fn in footnotes_deva:
-            f.write(fn + "\n")
-        print(f"Markdown written to output/{project_id}/devanagari/{project_id}.md")
+    # Scripts to output
+    scripts = {
+        "slp1": sanscript.SLP1,
+        "devanagari": sanscript.DEVANAGARI,
+        "iast": sanscript.IAST,
+    }
+
+    for script_name, target_script in scripts.items():
+        out_dir = os.path.join(output_base, script_name)
+        os.makedirs(out_dir, exist_ok=True)
+        out_file = os.path.join(out_dir, f"{project_id}.md")
+
+        translit_text, translit_apparatus = transliterate_markdown(text, apparatus, target_script)
+
+        with open(out_file, "w", encoding="utf-8") as f:
+            f.write(translit_text + "\n\n" + "\n".join(translit_apparatus))
+
+        print(f"Written {out_file}")
 
 if __name__ == "__main__":
     main()
