@@ -5,19 +5,11 @@ from collections import defaultdict
 from indic_transliteration import sanscript
 import os
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python merge_xml_to_markdown.py project_id")
-        sys.exit(1)
-
-    project_id = sys.argv[1]
-    xml_file = os.path.join("output", project_id, "slp1", f"{project_id}.xml")
-    md_file = os.path.join("output", project_id, "slp1", f"{project_id}.md")
-
-    if not os.path.exists(xml_file):
-        print(f"Error: XML file not found: {xml_file}")
-        sys.exit(1)
-
+def generate_markdown(xml_file, md_file, target_script):
+    """
+    Generate markdown from XML using given target_script.
+    target_script: 'slp1', 'iast', or 'devanagari'
+    """
     tree = ET.parse(xml_file)
     root = tree.getroot()
 
@@ -33,7 +25,7 @@ def main():
     main_text_parts = []
 
     for app in root.findall("app"):
-        # gather readings (already in SLP1)
+        # gather readings
         readings_map = defaultdict(list)  # reading -> list of witnesses
         for rdg in app.findall("rdg"):
             text_slp = rdg.text.strip() if rdg.text and rdg.text.strip() else ""
@@ -52,12 +44,11 @@ def main():
         # determine if main reading is empty and majority
         main_is_empty = not main_reading_slp
         if main_is_empty and len(main_wits) >= len(witness_order) / 2:
-            # majority empty: skip Φ in main text
             main_display = ""
         else:
             if not main_reading_slp:
                 main_reading_slp = "Φ"
-            main_display = sanscript.transliterate(main_reading_slp, 'slp1', 'devanagari')
+            main_display = sanscript.transliterate(main_reading_slp, 'slp1', target_script)
 
         # process minority readings
         minority_readings = sorted_readings[1:]
@@ -66,7 +57,7 @@ def main():
             for text_slp, wits in minority_readings:
                 if not text_slp:
                     text_slp = "Φ"
-                display_text = sanscript.transliterate(text_slp, 'slp1', 'devanagari')
+                display_text = sanscript.transliterate(text_slp, 'slp1', target_script)
                 wits_str = ",".join(sorted(wits, key=lambda w: witness_order.index(w)))
                 footnote_entries.append(f"[{wits_str}] {display_text}")
             if footnote_entries:
@@ -75,7 +66,6 @@ def main():
                 if main_display:
                     main_display += f"[^{footnote_counter}]"
                 else:
-                    # if main_display is empty, add just the footnote number
                     main_display = f"[^{footnote_counter}]"
                 footnote_counter += 1
 
@@ -93,5 +83,26 @@ def main():
 
     print(f"Markdown file written to {md_file}")
 
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python merge_xml_to_markdown.py project_id")
+        sys.exit(1)
+
+    project_id = sys.argv[1]
+    xml_file = os.path.join("output", project_id, "slp1", f"{project_id}.xml")
+
+    # SLP1 output (as-is)
+    md_slp1 = os.path.join("output", project_id, "slp1", f"{project_id}.md")
+    generate_markdown(xml_file, md_slp1, 'slp1')
+
+    # IAST output
+    md_iast = os.path.join("output", project_id, "iast", f"{project_id}.md")
+    generate_markdown(xml_file, md_iast, 'iast')
+
+    # Devanagari output
+    md_deva = os.path.join("output", project_id, "devanagari", f"{project_id}.md")
+    generate_markdown(xml_file, md_deva, 'devanagari')
+
 if __name__ == "__main__":
     main()
+
