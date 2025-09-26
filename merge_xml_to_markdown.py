@@ -3,14 +3,20 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from indic_transliteration import sanscript
+import os
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python xml_to_markdown.py collation_slp1.xml collated.md")
+    if len(sys.argv) != 2:
+        print("Usage: python merge_xml_to_markdown.py project_id")
         sys.exit(1)
 
-    xml_file = sys.argv[1]
-    md_file = sys.argv[2]
+    project_id = sys.argv[1]
+    xml_file = os.path.join("output", project_id, "slp1", f"{project_id}.xml")
+    md_file = os.path.join("output", project_id, "slp1", f"{project_id}.md")
+
+    if not os.path.exists(xml_file):
+        print(f"Error: XML file not found: {xml_file}")
+        sys.exit(1)
 
     tree = ET.parse(xml_file)
     root = tree.getroot()
@@ -30,8 +36,11 @@ def main():
         # gather readings (already in SLP1)
         readings_map = defaultdict(list)  # reading -> list of witnesses
         for rdg in app.findall("rdg"):
-            text_slp = rdg.text.strip() if rdg.text else ""
+            text_slp = rdg.text.strip() if rdg.text and rdg.text.strip() else ""
             readings_map[text_slp].append(rdg.get("wit"))
+
+        if not readings_map:
+            continue  # skip empty <app>
 
         # identify majority reading
         sorted_readings = sorted(
@@ -40,32 +49,49 @@ def main():
         )
         main_reading_slp, main_wits = sorted_readings[0]
 
-        # convert SLP1 -> Devanagari for display
-        main_display = sanscript.transliterate(main_reading_slp if main_reading_slp else "Φ", 'slp1', 'devanagari')
+        # determine if main reading is empty and majority
+        main_is_empty = not main_reading_slp
+        if main_is_empty and len(main_wits) >= len(witness_order) / 2:
+            # majority empty: skip Φ in main text
+            main_display = ""
+        else:
+            if not main_reading_slp:
+                main_reading_slp = "Φ"
+            main_display = sanscript.transliterate(main_reading_slp, 'slp1', 'devanagari')
 
         # process minority readings
         minority_readings = sorted_readings[1:]
         if minority_readings:
             footnote_entries = []
             for text_slp, wits in minority_readings:
-                display_text = sanscript.transliterate(text_slp if text_slp else "Φ", 'slp1', 'devanagari')
+                if not text_slp:
+                    text_slp = "Φ"
+                display_text = sanscript.transliterate(text_slp, 'slp1', 'devanagari')
                 wits_str = ",".join(sorted(wits, key=lambda w: witness_order.index(w)))
                 footnote_entries.append(f"[{wits_str}] {display_text}")
-            footnote_text = "; ".join(footnote_entries)
-            footnotes.append(f"[^{footnote_counter}]: {footnote_text}")
-            main_display += f"[^{footnote_counter}]"
-            footnote_counter += 1
+            if footnote_entries:
+                footnote_text = "; ".join(footnote_entries)
+                footnotes.append(f"[^{footnote_counter}]: {footnote_text}")
+                if main_display:
+                    main_display += f"[^{footnote_counter}]"
+                else:
+                    # if main_display is empty, add just the footnote number
+                    main_display = f"[^{footnote_counter}]"
+                footnote_counter += 1
 
         main_text_parts.append(main_display)
 
-    # join main text with spaces
-    main_text = " ".join(main_text_parts)
+    # join main text with spaces, ignoring empty strings
+    main_text = " ".join(filter(None, main_text_parts))
 
     # write to markdown
+    os.makedirs(os.path.dirname(md_file), exist_ok=True)
     with open(md_file, "w", encoding="utf-8") as f:
         f.write(main_text + "\n\n")
         for fn in footnotes:
             f.write(fn + "\n")
+
+    print(f"Markdown file written to {md_file}")
 
 if __name__ == "__main__":
     main()
