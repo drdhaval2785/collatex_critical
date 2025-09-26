@@ -30,7 +30,7 @@ pip install collatex-critical
 ### From GitHub (development version)
 
 ```bash
-pip install git+https://github.com/yourusername/collatex-critical.git
+pip install git+https://github.com/drdhaval2785/collatex-critical.git
 ```
 
 ---
@@ -130,7 +130,7 @@ Contributions are welcome:
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+GNU GPL v3.0. See [LICENSE](LICENSE) for details.
 
 ---
 
