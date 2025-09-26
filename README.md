@@ -2,7 +2,6 @@
 
 [![PyPI](https://img.shields.io/pypi/v/collatex-critical?color=blue\&label=PyPI)](https://pypi.org/project/collatex-critical/)
 [![Python](https://img.shields.io/pypi/pyversions/collatex-critical)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **collatex-critical** helps scholars prepare critical editions from multiple textual witnesses, producing outputs suitable for publication.
 
