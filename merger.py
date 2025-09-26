@@ -109,6 +109,7 @@ def main():
         f.write(main_text_slp1 + "\n\n")
         for fn in footnotes_slp1:
             f.write(fn + "\n")
+        print(f"Markdown written to output/{project_id}/slp1/{project_id}.md")
 
     # IAST
     main_text_iast, footnotes_iast = transliterate_text(main_text_slp1, footnotes_slp1, 'iast')
@@ -116,6 +117,7 @@ def main():
         f.write(main_text_iast + "\n\n")
         for fn in footnotes_iast:
             f.write(fn + "\n")
+        print(f"Markdown written to output/{project_id}/iast/{project_id}.md")
 
     # Devanagari
     main_text_deva, footnotes_deva = transliterate_text(main_text_slp1, footnotes_slp1, 'devanagari')
@@ -123,6 +125,7 @@ def main():
         f.write(main_text_deva + "\n\n")
         for fn in footnotes_deva:
             f.write(fn + "\n")
+        print(f"Markdown written to output/{project_id}/devanagari/{project_id}.md")
 
 if __name__ == "__main__":
     main()
