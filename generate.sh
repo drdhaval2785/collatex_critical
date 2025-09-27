@@ -61,19 +61,20 @@ for t in "${TRANSLITS[@]}"; do
   if [ -f "$MD_FILE" ]; then
 
     echo "Converting $MD_FILE to HTML..."
-    pandoc "$MD_FILE" \
-      -o "$OUTPUT_DIR/$t/$PROJECT_ID.html"
-
-    echo "Converting $MD_FILE to PDF..."
-    pandoc "$MD_FILE" \
-      -o "$OUTPUT_DIR/$t/$PROJECT_ID.pdf" \
-      --pdf-engine=xelatex \
-      -V mainfont="Sanskrit2003" \
-      --include-in-header=header.tex
+    pandoc --standalone --include-in-header=header_script.html "$MD_FILE" \
+    --metadata title="$PROJECT_ID"_"$t" \
+    -o "$OUTPUT_DIR/$t/$PROJECT_ID.html"
 
     echo "Converting $MD_FILE to TeX..."
     pandoc "$MD_FILE" \
       -o "$OUTPUT_DIR/$t/$PROJECT_ID.tex" \
+      --pdf-engine=xelatex \
+      -V mainfont="Sanskrit2003" \
+      --include-in-header=header.tex
+
+    echo "Converting $MD_FILE to PDF..."
+    pandoc "$MD_FILE" \
+      -o "$OUTPUT_DIR/$t/$PROJECT_ID.pdf" \
       --pdf-engine=xelatex \
       -V mainfont="Sanskrit2003" \
       --include-in-header=header.tex
