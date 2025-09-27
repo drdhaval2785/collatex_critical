@@ -37,7 +37,9 @@ pip install git+https://github.com/drdhaval2785/collatex-critical.git
 
 ## Dependencies
 
-1. **CollateX** (1.7.1 or later)
+1. **Java** - Java Runtime Environment (JRE) version 8 or higher is needed to run Collatex jar file.
+
+2. **CollateX** (1.7.1 or later)
    Download [here](https://collatex.net/download/).
    Example: [collatex-tools-1.7.1.jar](https://oss.sonatype.org/service/local/repositories/releases/content/eu/interedition/collatex-tools/1.7.1/collatex-tools-1.7.1.jar)
 
