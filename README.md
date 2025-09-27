@@ -133,7 +133,13 @@ If there is any error logged, make sure you have installed the necessary depende
 
 ## Example output
 
-<img width="773" height="630" alt="image" src="https://github.com/user-attachments/assets/ad634d2e-0902-40a2-8ca1-73c7971f85ec" />
+### PDF
+
+<img width="456" height="661" alt="image" src="https://github.com/user-attachments/assets/c2b846ea-3f3e-4e4f-a2f6-564d4da3994b" />
+
+### HTML
+
+<img width="663" height="214" alt="Screenshot_2025-09-27_12-12-57" src="https://github.com/user-attachments/assets/dd51656c-c5a9-4ea7-bc5a-a5a7d5752629" />
 
 
 ## Contributing
