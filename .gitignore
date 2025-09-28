@@ -4,3 +4,4 @@ collatex-tools-1.7.1.jar
 lorem_ipsum.py
 collatex_critical.egg-info/*
 dist/*
+__pycache__/*

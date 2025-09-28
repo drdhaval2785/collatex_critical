@@ -39,8 +39,10 @@ def transliterate_markdown(text, apparatus, source_script='slp1', target_script=
 # Collation and Markdown generation
 # --------------------------
 def collatex_critical(collatex_json, output_md, input_translit="slp1", output_translit="slp1"):
-    witnesses = collatex_json["witnesses"]
-    table = collatex_json["table"]
+    with open(collatex_json, 'r', encoding='utf-8') as jin:
+        json_data = json.load(jin)
+        witnesses = json_data["witnesses"]
+        table = json_data["table"]
     markdown_text = []
     apparatus_notes = []
     note_counter = 1
@@ -86,7 +88,7 @@ def collatex_critical(collatex_json, output_md, input_translit="slp1", output_tr
     text = " ".join(markdown_text)
     translit_text, translit_apparatus = transliterate_markdown(text, apparatus_notes, input_translit, output_translit)
 
-    return translit_text, translit_apparatus
+    return {"text": translit_text, "apparatus": translit_apparatus}
 
 
 # --------------------------
@@ -116,7 +118,9 @@ def main():
         out_dir = os.path.join(output_base, script_name)
         os.makedirs(out_dir, exist_ok=True)
         out_file = os.path.join(out_dir, f"{project_id}.md")
-        text, apparatus = collatex_critical(collatex_json, out_file, 'slp1', script_name)
+        x = collatex_critical(input_path, out_file, 'slp1', script_name)
+        text = x['text']
+        apparatus = x['apparatus']
 
         with open(out_file, "w", encoding="utf-8") as f:
             f.write(text + "\n\n" + "\n".join(apparatus))
