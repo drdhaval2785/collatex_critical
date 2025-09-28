@@ -6,10 +6,40 @@ import re
 from indic_transliteration import sanscript
 from indic_transliteration.sanscript import transliterate
 
+
+# --------------------------
+# Safe transliteration
+# --------------------------
+def safe_transliterate(text, source_script='slp1', target_script='slp1'):
+    """
+    Transliterates SLP1 text to target_script, keeping footnote markers [^1] 
+    and witness tags [w1,w2] unchanged.
+    """
+    pattern = r'\[\^\d+\]|\[[^\]]+\]'
+    parts = []
+    last = 0
+    for m in re.finditer(pattern, text):
+        if m.start() > last:
+            parts.append(transliterate(text[last:m.start()], source_script, target_script))
+        parts.append(m.group(0))
+        last = m.end()
+    if last < len(text):
+        parts.append(transliterate(text[last:], source_script, target_script))
+    return ''.join(parts)
+
+def transliterate_markdown(text, apparatus, source_script='slp1', target_script='slp1'):
+    translit_text = safe_transliterate(text, source_script, target_script)
+    translit_apparatus = []
+    for footnote, rest in apparatus:
+        translit_rest = safe_transliterate(rest, source_script, target_script)
+        translit_apparatus.append(f"{footnote}: {translit_rest}")
+    return translit_text, translit_apparatus
+
 # --------------------------
 # Collation and Markdown generation
 # --------------------------
-def collatex_json_to_markdown(collatex_json, witnesses):
+def collatex_critical(collatex_json, output_md, input_translit="slp1", output_translit="slp1"):
+    witnesses = collatex_json["witnesses"]
     table = collatex_json["table"]
     markdown_text = []
     apparatus_notes = []
@@ -53,35 +83,11 @@ def collatex_json_to_markdown(collatex_json, witnesses):
         else:
             markdown_text.append(base_reading.rstrip())
 
-    return " ".join(markdown_text), apparatus_notes
+    text = " ".join(markdown_text)
+    translit_text, translit_apparatus = transliterate_markdown(text, apparatus_notes, input_translit, output_translit)
 
-# --------------------------
-# Safe transliteration
-# --------------------------
-def safe_transliterate(text, target_script):
-    """
-    Transliterates SLP1 text to target_script, keeping footnote markers [^1] 
-    and witness tags [w1,w2] unchanged.
-    """
-    pattern = r'\[\^\d+\]|\[[^\]]+\]'
-    parts = []
-    last = 0
-    for m in re.finditer(pattern, text):
-        if m.start() > last:
-            parts.append(transliterate(text[last:m.start()], sanscript.SLP1, target_script))
-        parts.append(m.group(0))
-        last = m.end()
-    if last < len(text):
-        parts.append(transliterate(text[last:], sanscript.SLP1, target_script))
-    return ''.join(parts)
-
-def transliterate_markdown(text, apparatus, target_script):
-    translit_text = safe_transliterate(text, target_script)
-    translit_apparatus = []
-    for footnote, rest in apparatus:
-        translit_rest = safe_transliterate(rest, target_script)
-        translit_apparatus.append(f"{footnote}: {translit_rest}")
     return translit_text, translit_apparatus
+
 
 # --------------------------
 # Main script
@@ -94,32 +100,26 @@ def main():
     project_id = sys.argv[1]
     input_path = f"output/{project_id}/slp1/{project_id}.json"
     output_base = f"output/{project_id}"
+    
 
     # Load JSON
     with open(input_path, "r", encoding="utf-8") as f:
         collatex_json = json.load(f)
 
-    witnesses = collatex_json["witnesses"]
-
     # Generate base markdown
-    text, apparatus = collatex_json_to_markdown(collatex_json, witnesses)
+    source_script = 'slp1'
 
     # Scripts to output
-    scripts = {
-        "slp1": sanscript.SLP1,
-        "devanagari": sanscript.DEVANAGARI,
-        "iast": sanscript.IAST,
-    }
+    scripts = ["slp1", "devanagari", "iast"]
 
-    for script_name, target_script in scripts.items():
+    for script_name in scripts:
         out_dir = os.path.join(output_base, script_name)
         os.makedirs(out_dir, exist_ok=True)
         out_file = os.path.join(out_dir, f"{project_id}.md")
-
-        translit_text, translit_apparatus = transliterate_markdown(text, apparatus, target_script)
+        text, apparatus = collatex_critical(collatex_json, out_file, 'slp1', script_name)
 
         with open(out_file, "w", encoding="utf-8") as f:
-            f.write(translit_text + "\n\n" + "\n".join(translit_apparatus))
+            f.write(text + "\n\n" + "\n".join(apparatus))
 
         print(f"Written {out_file}")
 
