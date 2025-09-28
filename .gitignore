@@ -5,3 +5,6 @@ lorem_ipsum.py
 collatex_critical.egg-info/*
 dist/*
 __pycache__/*
+collatex_critical/__pycache__/*
+collatex_critical/resources/header_*.tex
+

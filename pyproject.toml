@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "collatex-critical"
-version = "0.1.3"
+version = "0.2.0"
 description = "Critical edition enhancements for CollateX with footnote apparatus and transliterations"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -14,6 +14,7 @@ authors = [{name = "Dr. Dhaval Patel", email = "drdhaval2785@gmail.com"}]
 dependencies = [
     "indic-transliteration"
 ]
+scripts = { "collatex-critical" = "collatex_critical.cli:main" }
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",

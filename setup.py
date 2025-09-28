@@ -20,7 +20,15 @@ setup(
         "indic-transliteration",
     ],
     include_package_data=True,
-    classifiers=[
+    package_data={
+        "collatex_critical": ["resources/*"],
+    },
+    entry_points={
+        "console_scripts": [
+            "collatex-critical=collatex_critical.cli:main",
+        ],
+    },
+     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",

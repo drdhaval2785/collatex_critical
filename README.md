@@ -110,6 +110,24 @@ For each project:
 
 ---
 
+## Standalone console scripts
+
+The installation of python package collatex-critical generates a console script `collatex-critical` entry point.
+It is available for single file collation and for batch collation, as described below.
+
+### Single collation
+
+`collatex-critical single -i input_json_file -o output_md_file -f input_transliteration -t output_tranlsiteration`
+
+### Batch collation
+
+`collatex-critical batch projectId`
+
+It presumes that the json for slp1 transliteration is already placed in `output/projectID/slp1/projectID.json`.
+It generates output MD files for slp1, devanagari and iast transliteration
+
+---
+
 ## Collation Logic
 
 1. **Majority Rule:** Reading preferred by the majority appears in the main text; others appear in footnotes.

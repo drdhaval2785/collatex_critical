@@ -52,7 +52,7 @@ echo "COLLATION COMPLETED AFTER $SECONDS SECONDS."
 
 # Step 4: Run merger
 echo "Running merger..."
-python collatex_critical.py "$PROJECT_ID"
+collatex-critical batch "$PROJECT_ID"
 echo "MERGER TO MARKDOWN COMPLETED AFTER $SECONDS SECONDS."
 
 # Step 5 & 6: Pandoc → PDF and TeX for all transliterations
