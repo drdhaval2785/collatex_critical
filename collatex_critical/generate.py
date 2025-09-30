@@ -93,16 +93,15 @@ def run_generate(project_id, translits=None):
             subprocess.run(cmd, check=True)
 
     # -------- Collate SLP1 files --------
-    if "slp1" in translits:
-        slp1_dir = os.path.join(input_dir, "slp1")
-        json_out = os.path.join(output_dir, "slp1", f"{project_id}.json")
-        txt_files = [f for f in os.listdir(slp1_dir) if f.endswith(".txt")]
-        txt_files.sort(key=natural_sort_key)
-        txt_files = [os.path.join(slp1_dir, f) for f in txt_files]
-        if txt_files:
-            cmd = ["java", "-jar", jar_path, "-f", "json", "-o", json_out, *txt_files]
-            print("Running:", " ".join(cmd))
-            subprocess.run(cmd, check=True)
+    slp1_dir = os.path.join(input_dir, "slp1")
+    json_out = os.path.join(output_dir, "slp1", f"{project_id}.json")
+    txt_files = [f for f in os.listdir(slp1_dir) if f.endswith(".txt")]
+    txt_files.sort(key=natural_sort_key)
+    txt_files = [os.path.join(slp1_dir, f) for f in txt_files]
+    if txt_files:
+        cmd = ["java", "-jar", jar_path, "-f", "json", "-o", json_out, *txt_files]
+        print("Running:", " ".join(cmd))
+        subprocess.run(cmd, check=True)
 
     # -------- Run batch merger --------
     print("GENERATING MARKDOWN FILES FOR ALL TRANSLITERATIONS.")
