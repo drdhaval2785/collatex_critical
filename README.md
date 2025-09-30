@@ -66,10 +66,6 @@ input/projectName/slp1
 output/projectName/devanagari
 output/projectName/iast
 output/projectName/slp1
-
-collatex-tools/1.7.1/collatex-tools-1.7.1.jar
-generate.sh
-merger.py
 ```
 
 ---
@@ -77,54 +73,30 @@ merger.py
 ## Setting Up a Project
 
 1. Place witness texts in `input/projectName/devanagari`.
+
 2. Name witness files according to precedence:
 
    * Less than 10 witnesses: `1.txt`, `2.txt`, `3.txt` …
    * 10 or more witnesses: `01.txt`, `02.txt`, `03.txt` …
+
 3. **File order indicates descending precedence** (first file = highest authority).
+
 4. Make sure that collatex-tools/1.7.1/collatex-tools-1.7.1.jar is in the same folder as generate.sh file.
 
 ---
 
 ## Running the Project
 
-```bash
-sh generate.sh projectName
-```
+`collatex-critical generate projectId`
 
-* Creates missing directories under `input/` and `output/`.
-* Generates outputs in all available transliteration schemes.
-* Input witness files must exist prior to running.
+It generates output MD files for slp1, devanagari and iast transliteration.
 
----
+* `projectName.md`, `projectName.pdf`, `projectName.tex`, `projectName.html` are generated in `output/projectName/devanagari/` and also similar files in iast and slp1 folders.
 
-## Output
+`collatex-critical generate projectId -t telugu,tamil,slp1`
 
-For each project:
-
-* `projectName.md`, `projectName.pdf`, `projectName.tex`, `projectName.html`
-  → `output/projectName/devanagari/`
-
-* Corresponding outputs in other transliterations:
-  → `output/projectName/iast/` and `output/projectName/slp1/`
-
----
-
-## Standalone console scripts
-
-The installation of python package collatex-critical generates a console script `collatex-critical` entry point.
-It is available for single file collation and for batch collation, as described below.
-
-### Single collation
-
-`collatex-critical single -i input_json_file -o output_md_file -f input_transliteration -t output_tranlsiteration`
-
-### Batch collation
-
-`collatex-critical batch projectId`
-
-It presumes that the json for slp1 transliteration is already placed in `output/projectID/slp1/projectID.json`.
-It generates output MD files for slp1, devanagari and iast transliteration
+comma separated transliteration schemes for specific transliterations. 
+Supported ones are `devanagari`, `telugu`, `tamil`, `kannada`, `velthuis`, `wx`, `itrans`, `slp1`, `iast`.
 
 ---
 
@@ -136,18 +108,6 @@ It generates output MD files for slp1, devanagari and iast transliteration
 > The choice of the most faithful witness is left to the editor’s discretion (e.g., oldest, most accurate, or scholarly judgment).
 
 ---
-
-## Checking your installation
-
-The github repository has a test data in input/test/devanagari/ directory.
-
-It carries three witnesses of a manuscript.
-
-Run the following from your commandline `sh generate.sh test`.
-
-If everything goes as expected, you should see the output in output/test directory.
-
-If there is any error logged, make sure you have installed the necessary dependencies and have the collatex-tools/1.7.1/collatex-tools-1.7.1.jar file at the correct location.
 
 ## Example output
 

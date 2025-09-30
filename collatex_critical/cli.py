@@ -1,7 +1,6 @@
 import argparse
 import os
 from .collatex_critical import collatex_critical
-from .batch import run_batch
 from .generate import run_generate
 
 def main():
