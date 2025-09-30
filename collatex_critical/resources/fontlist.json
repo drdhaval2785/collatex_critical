@@ -1,1 +1,52 @@
-{"devanagari": "Sanskrit2003", "gujarati": "NotoSansGujarati", "bengali": "Noto Sans Bengali", "gurmukhi": "Noto Sans Gurmukhi", "grantha": "Noto Sans Grantha", "kannada": "Noto Sans Kannada", "malayalam": "Noto Sans Malayalam", "nandinagari": "Noto Sans Nandinagari", "sharada": "Noto Sans Sharada", "tamil": "Noto Sans Tamil", "telugu": "Noto Sans Telugu", "slp1": "Sanskrit2003", "iast": "Sanskrit2003", "velthuis": "Sanskrit2003", "wx": "Sanskrit2003", "itrans": "Sanskrit2003", "hk": "Sanskrit2003", "optitrans": "Sanskrit2003", "titus": "Sanskrit2003"}
+{
+  "devanagari": {
+    "file": "Sanskrit2003.ttf",
+    "url": "https://www.ashtangayoga.info/fileadmin/03_Philosophie/04_Sanskrit/fonts/Sanskrit2003.ttf",
+    "fontname": "Sanskrit2003"
+  },
+  "bengali": {
+    "file": "TiroBangla-Regular.ttf",
+    "url": "https://github.com/google/fonts/raw/main/ofl/tirobangla/TiroBangla-Regular.ttf",
+    "fontname": "TiroBangla-Regular"
+  },
+  "tamil": {
+    "file": "TiroTamil-Regular.ttf",
+    "url": "https://github.com/google/fonts/raw/main/ofl/tirotamil/TiroTamil-Regular.ttf",
+    "fontname": "TiroTamil-Regular"
+  },
+  "telugu": {
+    "file": "TiroTelugu-Regular.ttf",
+    "url": "https://github.com/google/fonts/raw/main/ofl/tirotelugu/TiroTelugu-Regular.ttf",
+    "fontname": "TiroTelugu-Regular"
+  },
+  "kannada": {
+    "file": "TiroKannada-Regular.ttf",
+    "url": "https://github.com/google/fonts/raw/main/ofl/tirokannada/TiroKannada-Regular.ttf",
+    "fontname": "TiroKannada-Regular"
+  },
+  "slp1": {
+    "file": "Sanskrit2003.ttf",
+    "url": "https://www.ashtangayoga.info/fileadmin/03_Philosophie/04_Sanskrit/fonts/Sanskrit2003.ttf",
+    "fontname": "Sanskrit2003"
+  },
+  "iast": {
+    "file": "Sanskrit2003.ttf",
+    "url": "https://www.ashtangayoga.info/fileadmin/03_Philosophie/04_Sanskrit/fonts/Sanskrit2003.ttf",
+    "fontname": "Sanskrit2003"
+  },
+  "itrans": {
+    "file": "Sanskrit2003.ttf",
+    "url": "https://www.ashtangayoga.info/fileadmin/03_Philosophie/04_Sanskrit/fonts/Sanskrit2003.ttf",
+    "fontname": "Sanskrit2003"
+  },
+  "wx": {
+    "file": "Sanskrit2003.ttf",
+    "url": "https://www.ashtangayoga.info/fileadmin/03_Philosophie/04_Sanskrit/fonts/Sanskrit2003.ttf",
+    "fontname": "Sanskrit2003"
+  },
+  "velthuis": {
+    "file": "Sanskrit2003.ttf",
+    "url": "https://www.ashtangayoga.info/fileadmin/03_Philosophie/04_Sanskrit/fonts/Sanskrit2003.ttf",
+    "fontname": "Sanskrit2003"
+  }
+}

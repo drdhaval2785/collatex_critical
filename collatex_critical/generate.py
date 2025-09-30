@@ -5,9 +5,42 @@ import json
 from importlib.resources import files
 from .utils import ensure_collatex_jar, ensure_pandoc
 from .batch import run_batch  # your existing batch function
+import json
+import os
+import urllib.request
 
-
+FONTS_DIR = "fonts"
 DEFAULT_TRANSLITS = ["devanagari", "slp1", "iast"]
+
+
+def ensure_font(font_name, url):
+    os.makedirs(FONTS_DIR, exist_ok=True)
+    path = os.path.join(FONTS_DIR, font_name)
+    if not os.path.exists(path):
+        print(f"Downloading font {font_name}...")
+        urllib.request.urlretrieve(url, path)
+    return path
+
+def ensure_fonts_for_scripts(scripts):
+    fjson = str(files("collatex_critical.resources") / "fontlist.json")
+    with open(fjson, encoding="utf-8") as f:
+        fonts_config = json.load(f)
+    font_paths = {}
+    for script in scripts:
+        if script not in fonts_config:
+            print(f"⚠️ No font configured for script '{script}'")
+            continue
+        font_info = fonts_config[script]
+        font_paths[script] = ensure_font(font_info["file"], font_info["url"])
+    return font_paths
+
+
+def fontinfo(script):
+    fjson = str(files("collatex_critical.resources") / "fontlist.json")
+    with open(fjson, encoding="utf-8") as f:
+        fonts_config = json.load(f)
+    return fonts_config[script]
+
 
 def natural_sort_key(filename):
     """
@@ -21,24 +54,6 @@ def natural_sort_key(filename):
     return filename  # fallback
 
 
-def prepare_font(translit_scheme: str) -> str:
-    """
-    Create a LaTeX header file for the given transliteration scheme
-    based on fonts.json mapping.
-    Returns the path to the header file.
-    """
-    # Load font mapping JSON
-    resources_dir = files("collatex_critical.resources")
-    fonts_json = resources_dir / "fontlist.json"
-
-    with open(fonts_json, "r", encoding="utf-8") as f:
-        font_map = json.load(f)
-
-    # Default fallback font if scheme not found
-    font = font_map[translit_scheme]
-    return font
-
-
 def run_generate(project_id, translits=None):
     if translits is None:
         translits = DEFAULT_TRANSLITS
@@ -50,6 +65,8 @@ def run_generate(project_id, translits=None):
     # -------- Ensure dependencies --------
     jar_path = ensure_collatex_jar()
     ensure_pandoc()
+    # Ensure the availability of font
+    ensure_fonts_for_scripts(translits)
 
     # -------- Prepare transliteration directories --------
     for t in translits:
@@ -114,12 +131,15 @@ def run_generate(project_id, translits=None):
 
         # TeX
         tex_out = os.path.join(output_dir, t, f"{project_id}.tex")
-        font = prepare_font(t)
+        fx = fontinfo(t)
+        fontfile = fx['file']
+        
         subprocess.run([
             "pandoc", md_file,
             "-o", tex_out,
             "--pdf-engine=xelatex",
-            "-V", f'mainfont="{font}"',
+            "-V", f'mainfont="{fontfile}"',
+            "-V", f'mainfontoptions:Path=./fonts/',
             "--include-in-header", header_tex
         ], check=True)
         print(f"Writeen {tex_out}.")
@@ -130,7 +150,8 @@ def run_generate(project_id, translits=None):
             "pandoc", md_file,
             "-o", pdf_out,
             "--pdf-engine=xelatex",
-            "-V", f'mainfont="{font}"',
+            "-V", f'mainfont={fontfile}',
+            "-V", f'mainfontoptions:Path=./fonts/',
             "--include-in-header", header_tex
         ], check=True)
         print(f"Writeen {pdf_out}")
