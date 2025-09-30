@@ -60,6 +60,7 @@ def run_generate(project_id, translits=None):
 
     input_dir = os.path.join("input", project_id)
     output_dir = os.path.join("output", project_id)
+    os.makedirs(input_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
 
     # -------- Ensure dependencies --------
@@ -76,8 +77,6 @@ def run_generate(project_id, translits=None):
     # -------- Transliterate source files --------
     src = translits[0]
     src_dir = os.path.join(input_dir, src)
-    if not os.path.isdir(src_dir) or not os.listdir(src_dir):
-        raise FileNotFoundError(f"No files found in {src_dir}.")
 
     for fname in os.listdir(src_dir):
         fpath = os.path.join(src_dir, fname)
